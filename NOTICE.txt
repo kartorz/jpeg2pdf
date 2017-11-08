@@ -1,0 +1,9 @@
+The state of all files in this archive corresponds to the 7th revision
+of jpeg2pdf SVN repository from 12-Jan-2013 at
+svn://svn.code.sf.net/p/jpeg2pdf/code.
+
+To compile the code on Windows download jpeg2pdf_r7_compiler.zip,
+extract it to the folder with jpeg2pdf sources and run 'buildit.bat'.
+You can also download MinGW and libraries from the homepage of jpeg2pdf:
+
+http://sourceforge.net/projects/jpeg2pdf/

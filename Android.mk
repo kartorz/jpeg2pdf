@@ -1,0 +1,15 @@
+
+LOCAL_PATH:= $(call my-dir)
+
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES := Jpeg2PDF.c  testMain.c  glob.c
+#LOCAL_FORCE_STATIC_EXECUTABLE := true
+LOCAL_C_INCLUDES = $(LOCAL_PATH)
+LOCAL_CFLAGS = -c -Wall -O3
+#LOCAL_STATIC_LIBRARIES := 
+
+LOCAL_MODULE:= jpeg2pdf
+
+include $(BUILD_EXECUTABLE)
+

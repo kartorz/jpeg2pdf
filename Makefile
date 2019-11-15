@@ -8,20 +8,20 @@ else
 endif
 
 CC=gcc
-
+SRCS=src
 prefix=/usr/local
 
 all: jpeg2pdf
 
 # build
-jpeg2pdf: Jpeg2PDF.o testMain.o Jpeg2PDF.h
-	$(CC) Jpeg2PDF.o testMain.o -o jpeg2pdf
+jpeg2pdf: Jpeg2PDF.o testMain.o $(SRCS)/Jpeg2PDF.h
+	$(CC) $^ -o $@
 
-Jpeg2PDF.o: Jpeg2PDF.c Jpeg2PDF.h
-	$(CC) $(CFLAGS) Jpeg2PDF.c
+Jpeg2PDF.o: $(SRCS)/Jpeg2PDF.c $(SRCS)/Jpeg2PDF.h
+	$(CC) $(CFLAGS) $^
 
-testMain.o: testMain.c
-	$(CC) $(CFLAGS) testMain.c
+testMain.o: $(SRCS)/testMain.c
+	$(CC) $(CFLAGS) $^
 
 # test (depends on ghostscript and poppler)
 test: output.pdf
@@ -36,4 +36,4 @@ install: jpeg2pdf
 
 # cleanup
 clean:
-	rm -f *.o jpeg2pdf output.pdf
+	rm -f *.o $(SRCS)/*.gch jpeg2pdf output.pdf

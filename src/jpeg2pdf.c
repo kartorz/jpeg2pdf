@@ -31,12 +31,12 @@ PJPEG2PDF Jpeg2PDF_BeginDocument(double pdfW, double pdfH, double margin)   // w
     {
         memset(pPDF, 0, sizeof(JPEG2PDF));
         if(JPEG2PDF_DEBUG) logMsg("PDF List Inited (pPDF = %p)\n", (int)pPDF, 2,3,4,5,6);
-        pPDF->pageW = (UINT32)(pdfW * PDF_DOT_PER_INCH);
-        pPDF->pageH = (UINT32)(pdfH * PDF_DOT_PER_INCH);
+        pPDF->pageW = (double)(pdfW * PDF_DOT_PER_INCH);
+        pPDF->pageH = (double)(pdfH * PDF_DOT_PER_INCH);
         //Maximum image size without margins
         pPDF->margin = margin;
-        pPDF->maxImgW = (double) pPDF->pageW - (2 * margin * PDF_DOT_PER_INCH);
-        pPDF->maxImgH = (double) pPDF->pageH - (2 * margin * PDF_DOT_PER_INCH);
+        pPDF->maxImgW = (double) pPDF->pageW - (2.0 * margin * PDF_DOT_PER_INCH);
+        pPDF->maxImgH = (double) pPDF->pageH - (2.0 * margin * PDF_DOT_PER_INCH);
         if(JPEG2PDF_DEBUG) logMsg("PDF Page Size (%d %d) Max Image Size (%f %f)\n", pPDF->pageW, pPDF->pageH, pPDF->maxImgW, pPDF->maxImgH,3,4,5,6);
 
         pPDF->currentOffSet = 0;

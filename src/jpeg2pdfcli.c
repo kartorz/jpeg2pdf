@@ -712,8 +712,8 @@ int main(int argc, char *argv[])
 #ifdef HAVE_FINDFIRST
             findMaximumDimensions(filesarray, globlen, pageDpi, pageOrientation==Portrait || pageOrientation==Landscape, &pageWidth, &pageHeight);
 #endif
-            pageWidth += (pageMargins * 2);
-            pageHeight += (pageMargins * 2);
+            pageWidth += (pageMargins * 2.0);
+            pageHeight += (pageMargins * 2.0);
             printf("Selected paper size: %.2f x %.2f \" or %.2f x %.2f cm.\n", pageWidth, pageHeight, pageWidth*2.54, pageHeight*2.54);
         }
     }

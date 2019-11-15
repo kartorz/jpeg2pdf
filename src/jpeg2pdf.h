@@ -56,8 +56,8 @@ typedef struct
     UINT8 pdfHeader[MAX_PDF_HEADER];
     UINT8 pdfTailer[MAX_PDF_TAILER]; /* 28K Bytes */
     UINT8 pdfXREF[MAX_PDF_XREF][XREF_ENTRY_LEN + 1]; /* 27K Bytes */
-    UINT32 pageW, pageH, pdfObj, currentOffSet, imgObj;
-    double margin;
+    UINT32 pdfObj, currentOffSet, imgObj;
+    double pageW, pageH, margin;
     double maxImgW, maxImgH;
 } JPEG2PDF, *PJPEG2PDF;
 

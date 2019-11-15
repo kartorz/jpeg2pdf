@@ -67,7 +67,7 @@ typedef enum {FitWidth, FitHeight, FitNone} Fit; // how we should actually fit t
 typedef enum {false=0, true} bool;
 
 PJPEG2PDF       Jpeg2PDF_BeginDocument(double pdfW, double pdfH, double margin); /* pdfW, pdfH: Page Size in Inch ( 1 inch=25.4 mm ) */
-STATUS          Jpeg2PDF_AddJpeg(PJPEG2PDF pPDF, UINT32 imgW, UINT32 imgH, UINT32 fileSize, UINT8 *pJpeg, UINT8 isColor, PageOrientation pageOrientation, double dpiX, double dpiY, ScaleMethod scale, bool cropHeight, bool cropWidth);
+STATUS          Jpeg2PDF_AddJpeg(PJPEG2PDF pPDF, UINT32 imgW, UINT32 imgH, UINT32 fileSize, UINT8 *pJpeg, UINT8 isColor, PageOrientation pageOrientation, double dpiX, double dpiY, ScaleMethod scale, double pageLeft, double pageBottom, bool cropHeight, bool cropWidth);
 UINT32          Jpeg2PDF_EndDocument(PJPEG2PDF pPDF, char *timestamp, char* title, char* author, char* keywords, char* subject, char *creator);
 STATUS          Jpeg2PDF_GetFinalDocumentAndCleanup(PJPEG2PDF pPDF, UINT8 *outPDF, UINT32 *outPDFSize);
 

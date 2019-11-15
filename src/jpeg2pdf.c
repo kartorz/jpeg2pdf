@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "Jpeg2PDF.h"
+#include "jpeg2pdf.h"
 
 #define INDEX_USE_PPDF          (-1)
 
@@ -52,7 +52,7 @@ PJPEG2PDF Jpeg2PDF_BeginDocument(double pdfW, double pdfH, double margin)   // w
 }
 
 STATUS Jpeg2PDF_AddJpeg(PJPEG2PDF pPDF, UINT32 imgW, UINT32 imgH, UINT32 fileSize, UINT8 *pJpeg, UINT8 isColor, PageOrientation pageOrientation,
-                        double dpiX, double dpiY, ScaleMethod scale, bool cropHeight, bool cropWidth)
+                        double dpiX, double dpiY, ScaleMethod scale, double pageLeft, double pageBottom, bool cropHeight, bool cropWidth)
 {
     STATUS result = ERROR;
     PJPEG2PDF_NODE pNode;
@@ -176,8 +176,8 @@ STATUS Jpeg2PDF_AddJpeg(PJPEG2PDF pPDF, UINT32 imgW, UINT32 imgH, UINT32 fileSiz
                 }
 
                 // Set paper size from image size (possibly fitted/reduced to specific paper size) or properly rotate the page:
-                pageWidth=cropWidth ? (newImgW+pPDF->margin) : (pagePortrait ? pPDF->pageW : pPDF->pageH);
-                pageHeight=cropHeight ? (newImgH+pPDF->margin) : (pagePortrait ? pPDF->pageH : pPDF->pageW);
+                pageWidth = cropWidth ? (newImgW+pPDF->margin) : (pagePortrait ? pPDF->pageW : pPDF->pageH);
+                pageHeight = cropHeight ? (newImgH+pPDF->margin) : (pagePortrait ? pPDF->pageH : pPDF->pageW);
 
                 /* Page Object */
                 Jpeg2PDF_SetXREF(pPDF, INDEX_USE_PPDF, pPDF->currentOffSet, 'n');
@@ -190,8 +190,10 @@ STATUS Jpeg2PDF_AddJpeg(PJPEG2PDF pPDF, UINT32 imgW, UINT32 imgH, UINT32 fileSiz
 
                 /* Contents Object in Page Object */
                 Jpeg2PDF_SetXREF(pPDF, INDEX_USE_PPDF, pPDF->currentOffSet, 'n');
+                pageLeft = (pageLeft < 0) ? (pageWidth - newImgW)/2 : (pageLeft * PDF_DOT_PER_INCH);
+                pageBottom = (pageBottom < 0) ? (pageHeight - newImgH)/2 : (pageBottom * PDF_DOT_PER_INCH);
                 sprintf(lenStr, "q\n1 0 0 1 %.2f %.2f cm\n%.2f 0 0 %.2f 0 0 cm\n/I%d Do\nQ\n",
-                        (pageWidth-newImgW)/2, (pageHeight-newImgH)/2, newImgW, newImgH, pPDF->imgObj); // center image
+                        pageLeft, pageBottom, newImgW, newImgH, pPDF->imgObj); // center image
                 nChars = sprintf(pFormat, "%d 0 obj\n<</Length %d 0 R>>stream\n%sendstream\nendobj\n",
                                  pPDF->pdfObj, pPDF->pdfObj+1, lenStr);
                 pPDF->currentOffSet += nChars;

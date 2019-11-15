@@ -14,13 +14,13 @@ prefix=/usr/local
 all: jpeg2pdf
 
 # build
-jpeg2pdf: Jpeg2PDF.o testMain.o $(SRCS)/Jpeg2PDF.h
+jpeg2pdf: jpeg2pdf.o jpeg2pdfcli.o $(SRCS)/jpeg2pdf.h
 	$(CC) $^ -o $@
 
-Jpeg2PDF.o: $(SRCS)/Jpeg2PDF.c $(SRCS)/Jpeg2PDF.h
+jpeg2pdf.o: $(SRCS)/jpeg2pdf.c $(SRCS)/jpeg2pdf.h
 	$(CC) $(CFLAGS) $^
 
-testMain.o: $(SRCS)/testMain.c
+jpeg2pdfcli.o: $(SRCS)/jpeg2pdfcli.c
 	$(CC) $(CFLAGS) $^
 
 # test (depends on ghostscript and poppler)

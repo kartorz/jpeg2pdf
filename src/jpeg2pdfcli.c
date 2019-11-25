@@ -279,11 +279,11 @@ void printHelp( char *appname )
             "  [-d dpi]         global page dpi, default: get in image\n" \
             "  [-p papersize]   A0-A10,Letter,Legal,Junior,Ledger,Tabloid,auto default:auto\n" \
             "  [-n orientation] auto,portrait,landscape default:auto\n" \
-            "  [-m marginsize]  margins size in inches (specify 'mm' for millimeters) default:0\n" \
-            "  [-x widthpage]   width page in inches (specify 'mm' for millimeters) default:0\n" \
-            "  [-y heightpage]  height page in inches (specify 'mm' for millimeters) default:0\n" \
-            "  [-l leftsize]    left size in inches (specify 'mm' for millimeters) default:0\n" \
-            "  [-b bottomsize]  bottom size in inches (specify 'mm' for millimeters) default:0\n" \
+            "  [-m marginsize]  margins size in inches (specify 'mm' for millimeters, 'p' for points) default:0\n" \
+            "  [-x widthpage]   width page in inches (specify 'mm' for millimeters, 'p' for points) default:0\n" \
+            "  [-y heightpage]  height page in inches (specify 'mm' for millimeters, 'p' for points) default:0\n" \
+            "  [-l leftsize]    left size in inches (specify 'mm' for millimeters, 'p' for points) default:0\n" \
+            "  [-b bottomsize]  bottom size in inches (specify 'mm' for millimeters, 'p' for points) default:0\n" \
             "  [-z scale]       fit,fw,fh,reduce,rw,rh,none default:fit\n" \
             "  [-r crop]        none,height,width,both default:none crop/expand page to image size\n" \
             "  [-t title]       default: none\n" \
@@ -342,7 +342,7 @@ int main(int argc, char *argv[])
             outputFilename = optarg;
             break;
         case 'd':
-            pageDpi= atof(optarg);
+            pageDpi = atof(optarg);
             break;
         case 'p':
             if(strcasecmp("A0",optarg)==0)
@@ -441,6 +441,10 @@ int main(int argc, char *argv[])
             {
                 pageMargins /= 25.4;
             }
+            else if( strchr(optarg,'p')!=NULL )
+            {
+				pageMargins /= ((pageDpi < 0) ? PDF_DEF_DENSITY : pageDpi);
+            }
             break;
         case 'x':
             pageWidthDef = atof(optarg);
@@ -449,6 +453,10 @@ int main(int argc, char *argv[])
             {
                 pageWidthDef /= 25.4;
             }
+            else if( strchr(optarg,'p')!=NULL )
+            {
+				pageWidthDef /= ((pageDpi < 0) ? PDF_DEF_DENSITY : pageDpi);
+			}
             break;
         case 'y':
             pageHeightDef = atof(optarg);
@@ -456,6 +464,10 @@ int main(int argc, char *argv[])
             if( strchr(optarg,'m')!=NULL )
             {
                 pageHeightDef /= 25.4;
+            }
+            else if( strchr(optarg,'p')!=NULL )
+            {
+				pageHeightDef /= ((pageDpi < 0) ? PDF_DEF_DENSITY : pageDpi);
             }
             break;
         case 'l':
@@ -465,6 +477,10 @@ int main(int argc, char *argv[])
             {
                 pageLeftDef /= 25.4;
             }
+            else if( strchr(optarg,'p')!=NULL )
+            {
+				pageLeftDef /= ((pageDpi < 0) ? PDF_DEF_DENSITY : pageDpi);
+            }
             break;
         case 'b':
             pageBottomDef = atof(optarg);
@@ -472,6 +488,10 @@ int main(int argc, char *argv[])
             if( strchr(optarg,'m')!=NULL )
             {
                 pageBottomDef /= 25.4;
+            }
+            else if( strchr(optarg,'p')!=NULL )
+            {
+				pageBottomDef /= ((pageDpi < 0) ? PDF_DEF_DENSITY : pageDpi);
             }
             break;
         case 't':

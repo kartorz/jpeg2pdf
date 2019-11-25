@@ -18,7 +18,8 @@ typedef int STATUS;
 
 #define MAX_PDF_PAGES           15256
 
-#define PDF_DOT_PER_INCH                72
+#define PDF_DOT_PER_INCH        72
+#define PDF_DEF_DENSITY         300
 
 #define MAX_PDF_PREFORMAT_SIZE  256             /* Format Before each image, Usually less than 142 Bytes */
 #define MAX_PDF_PSTFORMAT_SIZE  512             /* Format After  each image, Usually less than 400 Bytes */

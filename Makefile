@@ -4,7 +4,7 @@ DEBUG?=0
 ifeq ($(DEBUG),1)
 	CFLAGS=-c -Wall -g -DJPEG2PDF_DEBUG=1
 else
-	CFLAGS=-c -Wall -O3
+	CFLAGS=-c -Wall
 endif
 
 CC=gcc

@@ -1,0 +1,66 @@
+.TH JPEG2PDF 1 "27 Dec 2017" "1.2.1" "User Manual"
+.SH DESCRIPTION
+ jpeg2pdf
+ Lossless conversion of jpeg images to PDF.
+.SH USAGE
+\fBjpeg2pdf\fP [\fBoptions\fP] filemask-1 ... [filemask-N]
+.SH OPTIONS
+positional arguments:
+.TP
+filemask-...
+input JPEG file name. requires at least one. wildcards '*' and '?' allowed.
+.TP
+-o outfile
+output PDF file name
+.PP
+optional arguments:
+.TP
+\fB-h\fP
+show help message and exit
+.TP
+\fB-d\fP dpi
+global page dpi, default: get in image
+.TP
+\fB-p\fP papersize
+A0-A10,Letter,Legal,Junior,Ledger,Tabloid,auto default:auto
+.TP
+\fB-n\fP orientation
+auto,portrait,landscape default:auto
+.TP
+\fB-m\fP marginsize
+margins size in inches (specify 'mm' for millimeters, 'p' for points) default:0
+.TP
+\fB-x\fP widthpage
+width page in inches (specify 'mm' for millimeters, 'p' for points)
+.TP
+\fB-y\fP heightpage
+height page in inches (specify 'mm' for millimeters, 'p' for points)
+.TP
+\fB-l\fP leftsize
+left size in inches (specify 'mm' for millimeters, 'p' for points)
+.TP
+\fB-b\fP bottomsize
+bottom size in inches (specify 'mm' for millimeters, 'p' for points)
+.TP
+\fB-z\fP scale
+fit,fw,fh,reduce,rw,rh,none default:fit
+.TP
+\fB-r\fP crop
+none,height,width,both default:none crop/expand page to image size
+.TP
+\fB-t\fP title
+default: none
+.TP
+\fB-a\fP author
+default: current user name
+.TP
+\fB-k\fP keywords
+default: input files list
+.TP
+\fB-s\fP subject
+default: 'Generated from JPEG images'
+.TP
+\fB-c\fP creator
+default: 'jpeg2pdf'
+.SH SEE ALSO
+ img2pdf(1), pdfwatermark(1)

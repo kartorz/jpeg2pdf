@@ -20,7 +20,7 @@
 
 #include "jpeg2pdf.h"
 
-unsigned char *JPEG2PDF_VERSION = "1.2";
+unsigned char *JPEG2PDF_VERSION = "1.3";
 
 //Gets the JPEG size from the array of data passed to the function, file reference: http://www.obrador.com/essentialjpeg/headerinfo.htm
 static int get_jpeg_size(unsigned char* data, unsigned int data_size, unsigned short *width, unsigned short *height, unsigned char *colors, double* dpiX, double* dpiY)
@@ -81,7 +81,7 @@ static int get_jpeg_size(unsigned char* data, unsigned int data_size, unsigned s
     }
 }
 
-void insertJPEGFile(const char *fileName, int fileSize, PJPEG2PDF pdfId, PageOrientation pageOrientation, ScaleMethod scale, int pageDpi, double pageLeft, double pageBottom, bool cropHeight, bool cropWidth)
+void insertJPEGFile(const char *fileName, int fileSize, PJPEG2PDF pdfId, PageOrientation pageOrientation, ScaleMethod scale, int pageDpi, bool cropHeight, bool cropWidth)
 {
     FILE  *fp;
     unsigned char *jpegBuf;
@@ -118,7 +118,7 @@ void insertJPEGFile(const char *fileName, int fileSize, PJPEG2PDF pdfId, PageOri
         }
         printf("Adding %s (%dx%d, %.0fx%.0f dpi)\n", fileName, jpegImgW, jpegImgH, dpiX, dpiY);
         /* Add JPEG File into PDF */
-        Jpeg2PDF_AddJpeg(pdfId, jpegImgW, jpegImgH, readInSize, jpegBuf, (3==colors), pageOrientation, dpiX, dpiY, scale, pageLeft, pageBottom, cropHeight, cropWidth);
+        Jpeg2PDF_AddJpeg(pdfId, jpegImgW, jpegImgH, readInSize, jpegBuf, (3==colors), pageOrientation, dpiX, dpiY, scale, cropHeight, cropWidth);
     }
     else
     {
@@ -279,11 +279,9 @@ void printHelp( char *appname )
             "  [-d dpi]         global page dpi, default: get in image\n" \
             "  [-p papersize]   A0-A10,Letter,Legal,Junior,Ledger,Tabloid,auto default:auto\n" \
             "  [-n orientation] auto,portrait,landscape default:auto\n" \
-            "  [-m marginsize]  margins size in inches (specify 'mm' for millimeters, 'p' for points) default:0\n" \
+            "  [-m l,t,r,b]     margins size in inches (specify 'mm' for millimeters, 'p' for points) default:0\n" \
             "  [-x widthpage]   width page in inches (specify 'mm' for millimeters, 'p' for points) default:0\n" \
             "  [-y heightpage]  height page in inches (specify 'mm' for millimeters, 'p' for points) default:0\n" \
-            "  [-l leftsize]    left size in inches (specify 'mm' for millimeters, 'p' for points) default:0\n" \
-            "  [-b bottomsize]  bottom size in inches (specify 'mm' for millimeters, 'p' for points) default:0\n" \
             "  [-z scale]       fit,fw,fh,reduce,rw,rh,none default:fit\n" \
             "  [-r crop]        none,height,width,both default:none crop/expand page to image size\n" \
             "  [-t title]       default: none\n" \
@@ -306,7 +304,7 @@ int main(int argc, char *argv[])
     FILE *fp;
     char *title=NULL, *author=NULL, *keywords=NULL, *subject=NULL, *creator=NULL;
     int opt;
-    double pageWidth=8.27, pageHeight=11.69, pageMargins=0, pageWidthDef=0, pageHeightDef=0, pageLeftDef=-1, pageBottomDef=-1;
+    double pageWidth=8.27, pageHeight=11.69, pageWidthDef=0, pageHeightDef=0;
     int globindex, globlen;
 #ifdef HAVE_GLOB
     glob_t globbuf;
@@ -322,6 +320,10 @@ int main(int argc, char *argv[])
     struct tm *tmp;
     char timestamp[40];
     int keywordslen, pageDpi=-1;
+    int np;
+    JPEG2PDF_MARGIN pageMargins;
+    pageMargins.left = pageMargins.right = pageMargins.top = pageMargins.bottom = -1.0;
+    pageMargins.width = pageMargins.height = 0;
 
     PageOrientation pageOrientation=PageOrientationAuto;
     ScaleMethod scale=ScaleFit;
@@ -334,7 +336,7 @@ int main(int argc, char *argv[])
         printHelp( argv[0] );
     }
 
-    while ((opt = getopt(argc, argv, "o:d:p:n:z:m:x:y:l:b:a:k:s:c:r:h")) != -1)
+    while ((opt = getopt(argc, argv, "o:d:p:n:z:m:x:y:a:k:s:c:r:h")) != -1)
     {
         switch (opt)
         {
@@ -435,16 +437,33 @@ int main(int argc, char *argv[])
             }
             break;
         case 'm':
-            pageMargins = atof(optarg);
+            np = sscanf(optarg, "%lf,%lf,%lf,%lf", &pageMargins.left, &pageMargins.top, &pageMargins.right, &pageMargins.bottom);
+            if (np < 2)
+            {
+                pageMargins.top = pageMargins.right = pageMargins.bottom = pageMargins.left;
+            }
+            else if (np < 3)
+            {
+                pageMargins.right = pageMargins.left;
+                pageMargins.bottom = pageMargins.top;
+            }
             /* mm */
             if( strchr(optarg,'m')!=NULL )
             {
-                pageMargins /= 25.4;
+                pageMargins.left /= 25.4;
+                pageMargins.top /= 25.4;
+                pageMargins.right /= 25.4;
+                pageMargins.bottom /= 25.4;
             }
             else if( strchr(optarg,'p')!=NULL )
             {
-				pageMargins /= ((pageDpi < 0) ? PDF_DEF_DENSITY : pageDpi);
+                pageMargins.left /= ((pageDpi < 0) ? PDF_DEF_DENSITY : pageDpi);
+                pageMargins.top /= ((pageDpi < 0) ? PDF_DEF_DENSITY : pageDpi);
+                pageMargins.right /= ((pageDpi < 0) ? PDF_DEF_DENSITY : pageDpi);
+                pageMargins.bottom /= ((pageDpi < 0) ? PDF_DEF_DENSITY : pageDpi);
             }
+            pageMargins.width = pageMargins.left + pageMargins.right;
+            pageMargins.height = pageMargins.top + pageMargins.bottom;
             break;
         case 'x':
             pageWidthDef = atof(optarg);
@@ -455,8 +474,8 @@ int main(int argc, char *argv[])
             }
             else if( strchr(optarg,'p')!=NULL )
             {
-				pageWidthDef /= ((pageDpi < 0) ? PDF_DEF_DENSITY : pageDpi);
-			}
+                pageWidthDef /= ((pageDpi < 0) ? PDF_DEF_DENSITY : pageDpi);
+            }
             break;
         case 'y':
             pageHeightDef = atof(optarg);
@@ -467,31 +486,7 @@ int main(int argc, char *argv[])
             }
             else if( strchr(optarg,'p')!=NULL )
             {
-				pageHeightDef /= ((pageDpi < 0) ? PDF_DEF_DENSITY : pageDpi);
-            }
-            break;
-        case 'l':
-            pageLeftDef = atof(optarg);
-            /* mm */
-            if( strchr(optarg,'m')!=NULL )
-            {
-                pageLeftDef /= 25.4;
-            }
-            else if( strchr(optarg,'p')!=NULL )
-            {
-				pageLeftDef /= ((pageDpi < 0) ? PDF_DEF_DENSITY : pageDpi);
-            }
-            break;
-        case 'b':
-            pageBottomDef = atof(optarg);
-            /* mm */
-            if( strchr(optarg,'m')!=NULL )
-            {
-                pageBottomDef /= 25.4;
-            }
-            else if( strchr(optarg,'p')!=NULL )
-            {
-				pageBottomDef /= ((pageDpi < 0) ? PDF_DEF_DENSITY : pageDpi);
+                pageHeightDef /= ((pageDpi < 0) ? PDF_DEF_DENSITY : pageDpi);
             }
             break;
         case 't':
@@ -732,8 +727,8 @@ int main(int argc, char *argv[])
 #ifdef HAVE_FINDFIRST
             findMaximumDimensions(filesarray, globlen, pageDpi, pageOrientation==Portrait || pageOrientation==Landscape, &pageWidth, &pageHeight);
 #endif
-            pageWidth += (pageMargins * 2.0);
-            pageHeight += (pageMargins * 2.0);
+            pageWidth += pageMargins.width;
+            pageHeight += pageMargins.height;
             printf("Selected paper size: %.2f x %.2f \" or %.2f x %.2f cm.\n", pageWidth, pageHeight, pageWidth*2.54, pageHeight*2.54);
         }
     }
@@ -753,7 +748,7 @@ int main(int argc, char *argv[])
                 perror("stat");
                 exit(EXIT_FAILURE);
             }
-            insertJPEGFile(globbuf.gl_pathv[globindex], sb.st_size, pdfId, pageOrientation, scale, pageDpi, pageLeftDef, pageBottomDef, cropHeight, cropWidth);
+            insertJPEGFile(globbuf.gl_pathv[globindex], sb.st_size, pdfId, pageOrientation, scale, pageDpi, cropHeight, cropWidth);
         }
         globfree(&globbuf);
 #endif
@@ -765,7 +760,7 @@ int main(int argc, char *argv[])
                 perror("stat");
                 exit(EXIT_FAILURE);
             }
-            insertJPEGFile(filesarray[globindex], sb.st_size, pdfId, pageOrientation, scale, pageDpi, pageLeftDef, pageBottomDef, cropHeight, cropWidth);
+            insertJPEGFile(filesarray[globindex], sb.st_size, pdfId, pageOrientation, scale, pageDpi, cropHeight, cropWidth);
         }
 #endif
 

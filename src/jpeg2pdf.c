@@ -22,7 +22,7 @@ static void Jpeg2PDF_SetXREF(PJPEG2PDF pPDF, int index, int offset, char c)
     if(JPEG2PDF_DEBUG) logMsg("pPDF->pdfXREF[%d] = %s", index, (int)pPDF->pdfXREF[index], 3,4,5,6);
 }
 
-PJPEG2PDF Jpeg2PDF_BeginDocument(double pdfW, double pdfH, double margin)   // width and height in default (portrait) orientation
+PJPEG2PDF Jpeg2PDF_BeginDocument(double pdfW, double pdfH, JPEG2PDF_MARGIN margin)   // width and height in default (portrait) orientation
 {
     PJPEG2PDF pPDF;
 
@@ -35,8 +35,8 @@ PJPEG2PDF Jpeg2PDF_BeginDocument(double pdfW, double pdfH, double margin)   // w
         pPDF->pageH = (double)(pdfH * PDF_DOT_PER_INCH);
         //Maximum image size without margins
         pPDF->margin = margin;
-        pPDF->maxImgW = (double) pPDF->pageW - (2.0 * margin * PDF_DOT_PER_INCH);
-        pPDF->maxImgH = (double) pPDF->pageH - (2.0 * margin * PDF_DOT_PER_INCH);
+        pPDF->maxImgW = (double) pPDF->pageW - (margin.width * PDF_DOT_PER_INCH);
+        pPDF->maxImgH = (double) pPDF->pageH - (margin.height * PDF_DOT_PER_INCH);
         if(JPEG2PDF_DEBUG) logMsg("PDF Page Size (%d %d) Max Image Size (%f %f)\n", pPDF->pageW, pPDF->pageH, pPDF->maxImgW, pPDF->maxImgH,3,4,5,6);
 
         pPDF->currentOffSet = 0;
@@ -52,10 +52,11 @@ PJPEG2PDF Jpeg2PDF_BeginDocument(double pdfW, double pdfH, double margin)   // w
 }
 
 STATUS Jpeg2PDF_AddJpeg(PJPEG2PDF pPDF, UINT32 imgW, UINT32 imgH, UINT32 fileSize, UINT8 *pJpeg, UINT8 isColor, PageOrientation pageOrientation,
-                        double dpiX, double dpiY, ScaleMethod scale, double pageLeft, double pageBottom, bool cropHeight, bool cropWidth)
+                        double dpiX, double dpiY, ScaleMethod scale, bool cropHeight, bool cropWidth)
 {
     STATUS result = ERROR;
     PJPEG2PDF_NODE pNode;
+    double pageLeft, pageBottom;
     double imgAspect, newImgW, newImgH;
 
     if(pPDF)
@@ -176,8 +177,8 @@ STATUS Jpeg2PDF_AddJpeg(PJPEG2PDF pPDF, UINT32 imgW, UINT32 imgH, UINT32 fileSiz
                 }
 
                 // Set paper size from image size (possibly fitted/reduced to specific paper size) or properly rotate the page:
-                pageWidth = cropWidth ? (newImgW+pPDF->margin) : (pagePortrait ? pPDF->pageW : pPDF->pageH);
-                pageHeight = cropHeight ? (newImgH+pPDF->margin) : (pagePortrait ? pPDF->pageH : pPDF->pageW);
+                pageWidth = cropWidth ? (newImgW+pPDF->margin.width) : (pagePortrait ? pPDF->pageW : pPDF->pageH);
+                pageHeight = cropHeight ? (newImgH+pPDF->margin.height) : (pagePortrait ? pPDF->pageH : pPDF->pageW);
 
                 /* Page Object */
                 Jpeg2PDF_SetXREF(pPDF, INDEX_USE_PPDF, pPDF->currentOffSet, 'n');
@@ -190,8 +191,8 @@ STATUS Jpeg2PDF_AddJpeg(PJPEG2PDF pPDF, UINT32 imgW, UINT32 imgH, UINT32 fileSiz
 
                 /* Contents Object in Page Object */
                 Jpeg2PDF_SetXREF(pPDF, INDEX_USE_PPDF, pPDF->currentOffSet, 'n');
-                pageLeft = (pageLeft < 0) ? (pageWidth - newImgW)/2 : (pageLeft * PDF_DOT_PER_INCH);
-                pageBottom = (pageBottom < 0) ? (pageHeight - newImgH)/2 : (pageBottom * PDF_DOT_PER_INCH);
+                pageLeft = (pPDF->margin.left < 0) ? (pageWidth - newImgW)/2 : (pPDF->margin.left * PDF_DOT_PER_INCH);
+                pageBottom = (pPDF->margin.bottom < 0) ? (pageHeight - newImgH)/2 : (pPDF->margin.bottom * PDF_DOT_PER_INCH);
                 sprintf(lenStr, "q\n1 0 0 1 %.2f %.2f cm\n%.2f 0 0 %.2f 0 0 cm\n/I%d Do\nQ\n",
                         pageLeft, pageBottom, newImgW, newImgH, pPDF->imgObj); // center image
                 nChars = sprintf(pFormat, "%d 0 obj\n<</Length %d 0 R>>stream\n%sendstream\nendobj\n",

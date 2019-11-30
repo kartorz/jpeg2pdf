@@ -35,7 +35,18 @@ struct jpeg2pdf_Node_struct
     UINT8 pstFormat[MAX_PDF_PSTFORMAT_SIZE];
 };
 
+struct jpeg2pdf_Margin
+{
+    double left;
+    double top;
+    double right;
+    double bottom;
+    double width;
+    double height;
+};
+
 typedef struct jpeg2pdf_Node_struct JPEG2PDF_NODE, *PJPEG2PDF_NODE;
+typedef struct jpeg2pdf_Margin JPEG2PDF_MARGIN, *PJPEG2PDF_MARGIN;
 
 #define XREF_ENTRY_LEN          20              /* Each XREF entry is 20 Bytes */
 #define OBJNUM_EXTRA            3               /* First Free Object; Kids Object; Catalog Object */
@@ -58,7 +69,8 @@ typedef struct
     UINT8 pdfTailer[MAX_PDF_TAILER]; /* 28K Bytes */
     UINT8 pdfXREF[MAX_PDF_XREF][XREF_ENTRY_LEN + 1]; /* 27K Bytes */
     UINT32 pdfObj, currentOffSet, imgObj;
-    double pageW, pageH, margin;
+    double pageW, pageH;
+    JPEG2PDF_MARGIN margin;
     double maxImgW, maxImgH;
 } JPEG2PDF, *PJPEG2PDF;
 
@@ -67,8 +79,8 @@ typedef enum {ScaleFit, ScaleFitWidth, ScaleFitHeight, ScaleReduce, ScaleReduceW
 typedef enum {FitWidth, FitHeight, FitNone} Fit; // how we should actually fit the image
 typedef enum {false=0, true} bool;
 
-PJPEG2PDF       Jpeg2PDF_BeginDocument(double pdfW, double pdfH, double margin); /* pdfW, pdfH: Page Size in Inch ( 1 inch=25.4 mm ) */
-STATUS          Jpeg2PDF_AddJpeg(PJPEG2PDF pPDF, UINT32 imgW, UINT32 imgH, UINT32 fileSize, UINT8 *pJpeg, UINT8 isColor, PageOrientation pageOrientation, double dpiX, double dpiY, ScaleMethod scale, double pageLeft, double pageBottom, bool cropHeight, bool cropWidth);
+PJPEG2PDF       Jpeg2PDF_BeginDocument(double pdfW, double pdfH, JPEG2PDF_MARGIN margin); /* pdfW, pdfH: Page Size in Inch ( 1 inch=25.4 mm ) */
+STATUS          Jpeg2PDF_AddJpeg(PJPEG2PDF pPDF, UINT32 imgW, UINT32 imgH, UINT32 fileSize, UINT8 *pJpeg, UINT8 isColor, PageOrientation pageOrientation, double dpiX, double dpiY, ScaleMethod scale, bool cropHeight, bool cropWidth);
 UINT32          Jpeg2PDF_EndDocument(PJPEG2PDF pPDF, char *timestamp, char* title, char* author, char* keywords, char* subject, char *creator);
 STATUS          Jpeg2PDF_GetFinalDocumentAndCleanup(PJPEG2PDF pPDF, UINT8 *outPDF, UINT32 *outPDFSize);
 
